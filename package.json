@@ -1,0 +1,16 @@
+{
+  "name": "uc-slot-checker",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Automated Urban Company InstaHelp slot checker",
+  "scripts": {
+    "login": "node scripts/login-local.js",
+    "check": "node scripts/check-slots.js",
+    "notify": "node scripts/notify.js"
+  },
+  "dependencies": {
+    "libsodium-wrappers": "^0.8.4",
+    "playwright": "^1.52.0",
+    "twilio": "^5.7.0"
+  }
+}
