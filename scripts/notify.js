@@ -26,7 +26,7 @@ async function main() {
   const result = JSON.parse(fs.readFileSync(resultPath, 'utf-8'));
 
   // Only notify for these statuses
-  const notifyStatuses = ['available', 'session_expired', 'error', 'unknown'];
+  const notifyStatuses = ['available', 'session_expired'];
   if (!notifyStatuses.includes(result.status)) {
     console.log('Status: ' + result.status + ' - no notification needed.');
     return;
