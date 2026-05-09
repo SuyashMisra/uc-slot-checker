@@ -157,23 +157,43 @@ async function main() {
       await screenshot(page, '06-slots');
     }
 
-    // Step 7: Check for "Professionals unavailable"
-    console.log('Step 7: Checking availability...');
-    const unavailable = await page.locator('h4:has-text("Professionals unavailable")').count();
-    const notifyBtn = await page.locator('button[aria-label="Notify when slots are available"]').count();
-    const busyText = await page.locator('text=All our professionals for this location are busy').count();
+    // Step 7: Wait for loading modal to finish and check availability
+    console.log('Step 7: Waiting for loading to finish and checking availability...');
+    
+    let isUnavailable = false;
+    let allTimes = [];
+    let attempts = 0;
 
-    if (unavailable > 0 || notifyBtn > 0 || busyText > 0) {
+    while (attempts < 30) {
+      // Check for unavailable messages
+      const unavailable = await page.locator('h4:has-text("Professionals unavailable")').count();
+      const notifyBtn = await page.locator('button[aria-label="Notify when slots are available"]').count();
+      const busyText = await page.locator('text=All our professionals for this location are busy').count();
+
+      if (unavailable > 0 || notifyBtn > 0 || busyText > 0) {
+        isUnavailable = true;
+        break;
+      }
+
+      // Check for time slots
+      const bodyText = await page.textContent('body');
+      const timePattern = /(\d{1,2}:\d{2}\s*(?:AM|PM))/gi;
+      allTimes = [...new Set(bodyText.match(timePattern) || [])];
+
+      if (allTimes.length > 0) {
+        break; // Found slots!
+      }
+
+      // Still loading, wait 1 second and try again
+      await page.waitForTimeout(1000);
+      attempts++;
+    }
+
+    if (isUnavailable) {
       console.log('  Result: Professionals unavailable');
       writeResult({ status: 'unavailable', message: 'Professionals are still unavailable.' });
       return;
     }
-
-    // Check for time slots
-    console.log('  No unavailability message found! Checking times...');
-    const bodyText = await page.textContent('body');
-    const timePattern = /(\d{1,2}:\d{2}\s*(?:AM|PM))/gi;
-    const allTimes = [...new Set(bodyText.match(timePattern) || [])];
 
     if (allTimes.length > 0) {
       console.log('  SLOTS FOUND: ' + allTimes.join(', '));
