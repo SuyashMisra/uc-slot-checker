@@ -68,8 +68,8 @@ async function main() {
       });
       console.log('SMS fallback sent! SID: ' + sms.sid);
     } catch (smsErr) {
-      console.error('SMS also failed: ' + smsErr.message);
-      process.exit(1);
+      console.warn('SMS also failed: ' + smsErr.message);
+      console.warn('Notification could not be delivered, but workflow will continue.');
     }
   }
 }
